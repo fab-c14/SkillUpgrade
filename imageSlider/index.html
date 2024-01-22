@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Slider</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f5f5f5;
+    }
+
+    #slider-container {
+      position: relative;
+      width: 80%;
+      max-width: 800px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    #slider {
+      display: flex;
+      transition: transform 0.5s ease-in-out;
+    }
+
+    .slide {
+      min-width: 100%;
+      height: 90vh; /* Set height to 90% of body height */
+      overflow: hidden;
+    }
+
+    .slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #prev, #next {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 24px;
+      cursor: pointer;
+     
+      color: #ff0000;
+    }
+
+    #prev {
+      left: 10px;
+    }
+
+    #next {
+      right: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="slider-container">
+  <div id="slider">
+    <!-- Images will be added dynamically using JavaScript -->
+  </div>
+  <button id="prev"><b>&lt;</b></button>
+  <button id="next"><b>&gt;</b></button>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const slider = document.getElementById("slider");
+    const prevButton = document.getElementById("prev");
+    const nextButton = document.getElementById("next");
+
+    let currentIndex = 0;
+    let intervalId;
+
+    // Fetch images from Picsum API
+    fetch("https://picsum.photos/v2/list?page=1&limit=6")
+      .then(response => response.json())
+      .then(data => {
+        data.forEach(image => {
+          const slide = document.createElement("div");
+          slide.classList.add("slide");
+          slide.innerHTML = `<img src="${image.download_url}" alt="Picsum Image">`;
+          slider.appendChild(slide);
+        });
+
+        // Start automatic sliding
+        startSlider();
+      })
+      .catch(error => console.error("Error fetching images:", error));
+
+    function updateSlider() {
+      const newPosition = -currentIndex * 100 + "%";
+      slider.style.transform = `translateX(${newPosition})`;
+    }
+
+    function showPrev() {
+      currentIndex = (currentIndex - 1 + slider.childElementCount) % slider.childElementCount;
+      updateSlider();
+      resetInterval();
+    }
+
+    function showNext() {
+      currentIndex = (currentIndex + 1) % slider.childElementCount; // after 6 curent index should be 0 so round to (0)
+      updateSlider();
+      resetInterval();
+    }
+
+    function startSlider() {
+      intervalId = setInterval(() => {
+        showNext();
+      }, 2000); // Change slide every 2 seconds
+    }
+
+    function resetInterval() {
+      clearInterval(intervalId);
+      startSlider();
+    }
+
+    prevButton.addEventListener("click", showPrev);
+    nextButton.addEventListener("click", showNext);
+  });
+</script>
+
+</body>
+</html>
